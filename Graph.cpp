@@ -345,6 +345,9 @@ void DG_check_cycle_dfs(vector<int> adj[], int n)
 }
 
 // it says if U->V then u must appear before v means all the adjacent nodes(V) must be printed later than U 
+//we can start with any node
+//the node which doesnot have any income edge will be at first as no node depend on that node so none of node will be before it 
+// and the node with no outgong edge will be at last cause it doesnot depend on any node so it wont be before any node
 // it is used when we need to sort something based on the dependency of nodes to one other (pepcoding )
 // we run dfs,when we reach node that has no adj than we add in the stack while coming back in the recursion i.e we add in the postorder,
 //when we add  a nodeee=U in stack it means all its adjacent nodes(V) have been added in stack so it means all the nodes that depended on that nodeee has been added in stack ,
@@ -392,6 +395,12 @@ void topological_sort_using_dfs(vector<int> adj[], int n)
 }
 
 //KAHN ALGORITHM
+//the node which doesnot have any income edge will be at first as no node depend on that node so none of node will be before it 
+// and the node with no outgong edge will be at last cause it doesnot depend on any node so it wont be before any node
+//  we use indegree array which stores the indegree of all the nodes,indegree means the no of edges pointed to a node
+//since we need a node with zero indeg which means no node depend on it,  means that all the node will come after that node,so we add all such nodes with indeg 0 in queue
+//  then we apply normal bfs and we decrease the indeg of each adjacent nodes ,since the node will be printed already so,
+// then if a adjacent nodes indeg becomes 0 we add it in the queue 
 void topological_sort_using_bfs(vector<int> adj[], int n)
 {
     queue<int> q;
