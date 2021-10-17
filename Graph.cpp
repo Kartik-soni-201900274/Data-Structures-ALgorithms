@@ -3,6 +3,7 @@
 #include <vector>
 #include <stack>
 
+
 using namespace std;
 
 vector<int> bfs(vector<int> adj[], int n)
@@ -241,15 +242,13 @@ void bfs_check_bipartite(vector<int> adj[], int n)
             }
         }
     }
-
-    cout << "NOT BIPARTITE";
+  cout << "NOT BIPARTITE";
 }
 
 bool check_dfs(vector<int> adj[], int node, vector<int> &color)
 {
     if (color[node] == -1)
     {
-
         color[node] = 1;
     }
     for (int i : adj[node])
@@ -324,7 +323,6 @@ bool DG_dfs_cycle(vector<int> adj[], int node, vector<int> &vis, vector<int> &df
 
 void DG_check_cycle_dfs(vector<int> adj[], int n)
 {
-
     vector<int> vis(n + 1, 0);
     vector<int> dfs_vis(n + 1, 0);
     bool flag = false;
@@ -404,16 +402,16 @@ void topological_sort_using_dfs(vector<int> adj[], int n)
 void topological_sort_using_bfs(vector<int> adj[], int n)
 {
     queue<int> q;
-    vector<int> indeg(n, 0);
+    vector<int> indeg(n+1, 0);
    
-    for (int i = 0; i < n; i++)
+    for (int i = 1; i <= n; i++)
     {
         for (int v : adj[i])
         {
             indeg[v]++;
         }
     }
-    for (int i = 0; i < n; i++)
+    for (int i = 1; i <= n; i++)
     {
         if(indeg[i]==0)
         {
@@ -433,10 +431,8 @@ void topological_sort_using_bfs(vector<int> adj[], int n)
                 q.push(it);
             }
         }
-
     }
-    
-    
+
 }
 
 void DG_cycle_detection_BFS(vector<int> adj[],int n)
@@ -485,12 +481,6 @@ void DG_cycle_detection_BFS(vector<int> adj[],int n)
     }
 }
 
-
-
-
-
-
-
 //using bfs we do this 
 //we take a dis array and mark all elemnts value with a highest value 
 //in which we store the distanc eof each indices from the src and at end we have all the distance between src to any dest
@@ -525,18 +515,138 @@ for(int it:dis)
 {
     cout<<it<<" ";
 }
+}
 
+// we take a priority queue
+// we take a source node and add it in the pq ,now we visit its adj nodes and if their distance is greater thatn we update the adj nodes distance and add in the queue
+// after pushing all the adj nodes now we again move to next node which has the smallest dis of all the nodes in pq,so priority queue returns automatically nodes with min dist
+//  we keep on goin throught the smallest dis nodes and keep updating
+//  we make distance of source initially zero as dis from source to source is 0 always
+//  distance of nextnode currently> dist of the parent node from source + wt of next node (which is the dis from parent node to the adj node)
+//  if above is true than we update nodes distance with dis of partent node +wt of adj node
+// in our way we take the min node update the distance of all its adj nodes if they are greater and keep on doing it
+//  suppose node 3 is connected to 1 and 2 now at first node 3's dis will be inf but later it will be updated to its wt+dis of parent node.ie.1 and then  3 will be pushed 
+//  but when 2s adj nodes are being added if the wt + dis of 2 is less that its dist from 1 (prev dist) than we uupdate the dist and again add it in the queue
 
-
-
-
+void dijkstraAlgo(vector<pair<int, int>> adj[],int n,vector<int> &dis,int src)
+{
+    priority_queue<pair<int,int>,vector<pair<int,int>>,greater<pair<int,int>>> pq;
+    dis[src]=0;
+    pq.push( {0,src});
+    while(!pq.empty())
+    {
+        int node=pq.top().second;
+        int dist=pq.top().first;
+        pq.pop();
+        for(pair<int,int> p:adj[node])
+        {
+            int adj_node=p.first;
+            int adj_node_wt=p.second;
+            if (dis[adj_node] > dis[node] + adj_node_wt)
+            {
+                dis[adj_node] = dis[node] + adj_node_wt;
+                pq.push({dis[adj_node], adj_node});
+            }
+        }
+    }
 }
 
 
 
 
+// in prims algo we make a tree with nodes and edges of minimum value;
+//we take three arrays MST(for telling if a node has been added to the tree )
+//parent array which stores the info about the node and its parent of the spanning tree
+//dis array we store the current dis of the node 
+// we take the pq as in dikstra because we want to get the least weight edge from all the adj nodes 
+// so we add the first node as src in pq with its dis as 0
 
-int main()
+// in mst we need n nodes and n-1 edges so we run a loop till n-1
+//now we update the distance of each adj nodes and add in the pq ,while adding in the queue we dont push than node in the tree,,,,
+//we push the adj nodes in the queue to get the minim weighted node
+//and we take out the node with shortest dis and then add in the tree by doing mst[node]=true;
+// suppose node 3 is connected to 1 and 2 now at first node 3's dis will be inf but later it will be updated to its wt from 1 and then parent of 3 will be 1 
+// but when 2s adj nodes are being added if the wt of 3 from 2 is less that its dist from 1 (prev dist) than we uupdate the dist and update its parent to be 2 
+// so at first inj the tree 3 was connected to 1 but later it got ocnnected to 2
+
+void prims_Algo(vector<pair<int, int>> adj[],int n)
+{
+    bool MST[n];
+   int  parent[n];
+   int dis[n];
+   for(int i=0;i<n;i++)
+   {
+       MST[i]=false;
+       parent[i]=-1;
+       dis[i]=INT32_MAX;
+   }
+    dis[0]=0;
+   
+    priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> pq;
+    pq.push({0,0});
+    for(int i=0;i<n-1;i++)
+    {
+        int node=pq.top().second;
+        pq.pop();
+        MST[node]=true;
+        for(pair<int,int> it:adj[node])
+        {
+            int adj_dis=it.second;
+            int adj_node=it.first;
+          
+            if(MST[adj_node]!=true && adj_dis<dis[adj_node])
+            {
+                pq.push({adj_dis,adj_node});
+                parent[adj_node]=node;
+                dis[adj_node]=adj_dis;
+            }
+            
+        }
+
+    }
+    for(int i: parent)
+    {
+        cout<<i<<" ";
+    }
+}
+
+    void min_time_take_by_each_job(vector<int> adj[], int n)
+{
+    queue<pair<int,int>> q;
+    vector<int> indeg(n + 1, 0);
+
+    for (int i = 1; i <= n; i++)
+    {
+        for (int v : adj[i])
+        {
+            indeg[v]++;
+        }
+    }
+    for (int i = 1; i <= n; i++)
+    {
+        if (indeg[i] == 0)
+        {
+            q.push({i,1});
+        }
+    }
+    while (!q.empty())
+    {
+        int node = q.front().first;
+        int time=q.front().second;
+        q.pop();
+        cout << time << " ";
+        for (int it : adj[node])
+        {
+            indeg[it]--;
+            if (indeg[it] == 0)
+            {
+                q.push({it,time+1});
+            }
+        }
+    }
+}
+
+    int main()
 {
 
     // int arr[3] = {2, 5, 10};
@@ -547,17 +657,24 @@ int main()
     cout << "enter the nodes and edges: ";
     cin >> n >> m;
     // int adj[n + 1][n + 1]={0};
-    vector<int> adj[n];
+    vector<pair<int,int>> adj[n];
 
     for (int i = 0; i < m; i++)
     {
        
-        int u, v;
-        cin >> u >> v;
-        adj[u].push_back(v);
-       
-    }
-    topological_sort_using_dfs(adj, n);
+        int u, v,w;
+        cin >> u >> v>>w;
+        adj[u].push_back({v,w});
+        adj[v].push_back({u,w});
+        }
+    vector<int> dist(n+1,INT32_MAX);
+    prims_Algo(adj, n);
+
+   
+    // for(int i:dist)
+    // {
+    //     cout<<i<<" ";
+    // }
 
     //     vector<int> dfs_vec = dfs_of_graph(adj, n);
     //     for (int i : dfs_vec)
@@ -581,3 +698,5 @@ int main()
     //     cout << "\n";
     // }
 }
+
+
