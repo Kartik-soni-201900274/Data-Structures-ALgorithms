@@ -517,6 +517,8 @@ for(int it:dis)
 }
 }
 
+// daik-stra 
+
 // we take a priority queue
 // we take a source node and add it in the pq ,now we visit its adj nodes and if their distance is greater thatn we update the adj nodes distance and add in the queue
 // after pushing all the adj nodes now we again move to next node which has the smallest dis of all the nodes in pq,so priority queue returns automatically nodes with min dist
@@ -527,6 +529,7 @@ for(int it:dis)
 // in our way we take the min node update the distance of all its adj nodes if they are greater and keep on doing it
 //  suppose node 3 is connected to 1 and 2 now at first node 3's dis will be inf but later it will be updated to its wt+dis of parent node.ie.1 and then  3 will be pushed 
 //  but when 2s adj nodes are being added if the wt + dis of 2 is less that its dist from 1 (prev dist) than we uupdate the dist and again add it in the queue
+
 
 void dijkstraAlgo(vector<pair<int, int>> adj[],int n,vector<int> &dis,int src)
 {
@@ -645,6 +648,60 @@ void prims_Algo(vector<pair<int, int>> adj[],int n)
         }
     }
 }
+struct Node{
+int u,v,w;
+Node(int _u,int _v,int _w)
+{
+    u=_u;v=_v;w=_w;
+}
+
+};
+
+//bellman ford TC(o(N-1)*(e))
+//work for directed for both +ve and -ve edges but no negative cycles 
+//work for undirected but no -ve edges
+//if undirected we need to convert graph to directed
+//we need to draverse each edge for totalnode-1 times and relax each node
+//after n-1 times the shorted distance value in dis array  can be more reduces but if it furether reduces when doing one more 
+//cycle than there is negative cycle
+void BellmanFordAlgorithm(int n,vector<Node> &edges)
+{
+
+    int inf = 10000000;
+    vector<int> dist(n, inf);
+
+    dist[0] = 0;
+
+    for (int i = 1; i <= n - 1; i++)
+    {
+        for (auto it : edges)
+        {
+            if (dist[it.u] + it.w < dist[it.v])
+            {
+                dist[it.v] = dist[it.u] + it.w;
+            }
+        }
+    }
+
+    int fl = 0;
+    for (auto it : edges)
+    {
+        if (dist[it.u] + it.w < dist[it.v])
+        {
+            cout << "Negative Cycle";
+            fl = 1;
+            break;
+        }
+    }
+
+    if (!fl)
+    {
+        for (int i = 0; i < n; i++)
+        {
+            cout << i << " " << dist[i] << endl;
+        }
+    }
+}
 
     int main()
 {
@@ -657,18 +714,17 @@ void prims_Algo(vector<pair<int, int>> adj[],int n)
     cout << "enter the nodes and edges: ";
     cin >> n >> m;
     // int adj[n + 1][n + 1]={0};
-    vector<pair<int,int>> adj[n];
+    vector<Node> adj;
 
     for (int i = 0; i < m; i++)
     {
        
         int u, v,w;
         cin >> u >> v>>w;
-        adj[u].push_back({v,w});
-        adj[v].push_back({u,w});
+        adj.push_back(Node(u,v,w));
+       
         }
-    vector<int> dist(n+1,INT32_MAX);
-    prims_Algo(adj, n);
+    BellmanFordAlgorithm(n,adj);
 
    
     // for(int i:dist)
@@ -698,5 +754,4 @@ void prims_Algo(vector<pair<int, int>> adj[],int n)
     //     cout << "\n";
     // }
 }
-
 
