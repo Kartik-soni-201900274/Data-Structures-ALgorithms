@@ -517,7 +517,9 @@ for(int it:dis)
 }
 }
 
-// daik-stra 
+
+
+// daik-stra
 
 // we take a priority queue
 // we take a source node and add it in the pq ,now we visit its adj nodes and if their distance is greater thatn we update the adj nodes distance and add in the queue
@@ -527,7 +529,7 @@ for(int it:dis)
 //  distance of nextnode currently> dist of the parent node from source + wt of next node (which is the dis from parent node to the adj node)
 //  if above is true than we update nodes distance with dis of partent node +wt of adj node
 // in our way we take the min node update the distance of all its adj nodes if they are greater and keep on doing it
-//  suppose node 3 is connected to 1 and 2 now at first node 3's dis will be inf but later it will be updated to its wt+dis of parent node.ie.1 and then  3 will be pushed 
+//  suppose node 3 is connected to 1 and 2 now at first node 3's dis will be inf but later it will be updated to its wt+dis of parent node.ie.1 and then  3 will be pushed
 //  but when 2s adj nodes are being added if the wt + dis of 2 is less that its dist from 1 (prev dist) than we uupdate the dist and again add it in the queue
 
 
@@ -670,7 +672,7 @@ void BellmanFordAlgorithm(int n,vector<Node> &edges)
     int inf = 10000000;
     vector<int> dist(n, inf);
 
-    dist[0] = 0;
+    dist[1] = 0;
 
     for (int i = 1; i <= n - 1; i++)
     {
@@ -703,6 +705,114 @@ void BellmanFordAlgorithm(int n,vector<Node> &edges)
     }
 }
 
+
+
+//for longest path 
+//METHOD 1
+//we can make all the dges negative and mark the src node dis as 0  and use the bellman ford the result will be the longest path but will be in negative so we must at end 
+//make the output to pos
+
+// METHOD 2
+// https://youtu.be/jdTnoCBSOVM
+// first we do topo sort to get the order in which node to be traversed because if we get to node which is not traversed than its adj nodes cant be updated
+
+// By not using topo the expected time complexity would not be O(V+E) as we have to visit an edge multiple times.
+// But by using the topological sorting, we get the order in which the vertices should be traversed so that an edge is visited exactly once.
+// So we could have guaranteed T.C. of O(V+E).
+// Why Topological ordering ?
+// Topological ordering gives us the order like 0 1 2 3 4 5 then, once we reach a node in this ordering (let's say 4)
+// then we've already computed the shortest path to it (4) as all the edges(as well as paths) of type u -> v (v = 4) and have already been visited.
+// toposort will assure us that when we are at a node its value will be already be updated so that we can updates its adj nodes
+// toposort will assure us that when we are at a node then the value of nodes and their adj nodes will already be updated due to which the value of node wont change again
+
+//below in bfss_d_DG func we havent used vis due to which if say node 2 is once updated and all its adj are updated but when again we get 2 and dis is less 
+//then we again have to push 2 and update it
+void bfs_shortest_distance_DG(int src, int n, vector<pair<int, int>> adj[])
+{
+    vector<int> dis(n, INT32_MIN);
+    queue<int> q;
+    dis[src] = 0;
+    q.push(src);
+    while (!q.empty())
+    {
+        int node = q.front();
+        q.pop();
+        for (pair<int, int> p : adj[node])
+        {
+            int adj_node = p.first;
+            int adj_wt = p.second;
+            if (dis[adj_node] < dis[node] + adj_wt)
+            {
+                dis[adj_node] = dis[node] + adj_wt;
+                q.push(adj_node);
+            }
+        }
+    }
+
+    for (int it : dis)
+    {
+        cout << it << " ";
+    }
+}
+void topo_for_longestpath(vector<pair<int, int>> adj[], int node, vector<int> &vis, stack<int> &st)
+{
+    vis[node] = 1;
+    for (pair<int,int> it : adj[node])
+    {
+        if (!vis[it.first])
+        {
+            topo_for_longestpath(adj, it.first, vis, st);
+        }
+    }
+
+    st.push(node);
+}
+
+void longest_path(int src, int n, vector<pair<int,int>> adj[])
+{
+    vector<int> vis(n,0);
+    stack<int> st;
+    const int int_min = -10000000 ;
+    vector<int> dis(n,int_min );
+    dis[src]=0;
+    for(int i=0;i<n;i++)
+    {
+        if(!vis[i])
+        {
+             topo_for_longestpath(adj, i, vis, st);
+        }
+    
+    }
+
+    while(!st.empty())
+    {
+        if(dis[st.top()]!=int_min)
+        {
+            int node = st.top();
+            
+             for (pair<int,int> p :adj[node])
+             {
+                 int adj_node=p.first;
+                 int adj_wt=p.second;
+                 if(dis[adj_node]<dis[node]+adj_wt)
+                 {
+                     dis[adj_node] = dis[node] + adj_wt;
+                 }
+             }
+        }
+        st.pop();
+    }
+for(int x:dis)
+{
+    cout<<x<<" ";
+}
+
+  
+}
+
+
+
+
     int main()
 {
 
@@ -714,44 +824,42 @@ void BellmanFordAlgorithm(int n,vector<Node> &edges)
     cout << "enter the nodes and edges: ";
     cin >> n >> m;
     // int adj[n + 1][n + 1]={0};
-    vector<Node> adj;
+    vector<pair<int,int>> adj[n];
 
     for (int i = 0; i < m; i++)
     {
        
         int u, v,w;
         cin >> u >> v>>w;
-        adj.push_back(Node(u,v,w));
+        adj[u].push_back({v,w});
        
         }
-    BellmanFordAlgorithm(n,adj);
+        bfs_shortest_distance_DG(1, n, adj);
 
-   
-    // for(int i:dist)
-    // {
-    //     cout<<i<<" ";
-    // }
+        // for(int i:dist)
+        // {
+        //     cout<<i<<" ";
+        // }
 
-    //     vector<int> dfs_vec = dfs_of_graph(adj, n);
-    //     for (int i : dfs_vec)
-    //     {
-    //         cout << i;
-    //     }
-    // cout<<"\n";
-    //     vector<int> bfs_vec = bfs(adj, n);
-    //     for (int i : bfs_vec)
-    //     {
-    //         cout << i;
-    //     }
+        //     vector<int> dfs_vec = dfs_of_graph(adj, n);
+        //     for (int i : dfs_vec)
+        //     {
+        //         cout << i;
+        //     }
+        // cout<<"\n";
+        //     vector<int> bfs_vec = bfs(adj, n);
+        //     for (int i : bfs_vec)
+        //     {
+        //         cout << i;
+        //     }
 
-    // for (vector<int> i : adj)
-    // {
-    //     for (int s : i)
-    //     {
-    //         cout << s;
-    //     }
+        // for (vector<int> i : adj)
+        // {
+        //     for (int s : i)
+        //     {
+        //         cout << s;
+        //     }
 
-    //     cout << "\n";
-    // }
+        //     cout << "\n";
+        // }
 }
-
